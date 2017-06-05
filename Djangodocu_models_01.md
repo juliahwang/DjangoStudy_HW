@@ -258,14 +258,14 @@ place = models.OneToOneField(Place, verbose_name="related place")
 # many-to-one relationshipclass Manufacturer(models.Model):    # ...    passclass Car(models.Model):    manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
 ```
 
-```
+```python
 # many-to-one example
 class Reporter(models.Model):    first_name = models.CharField(max_length=30)    last_name = models.CharField(max_length=30)    email = models.EmailField()    def __str__(self):        return "%s %s %s" % (self.first_name, self.last_name, self.email)class Article(models.Model):    headline = models.CharField(max_length=100)    pub_date = models.DateField()    reporter = models.ForeignKey(Reporter, on_delete=models.CASCADE)    def __str__(self):        return self.headline    class Meta:        ordering = ('headline',)
 ```
 
 쿼리셋에서 테스트 해보기
 
-```
+```python
 >>> r = Reporter(first_name='julia', last_name='hwang', email='hello@example.com'). # 기자 정보 생성
 >>> r.save(). # 기자 정보 저장
 
@@ -308,7 +308,7 @@ class Pizza(models.Model):
 ```
 
 또한 재귀관계를 나타낼 수 있다. 
-즉, 매니투매니 관계를 지니는 테이블 자신과 재귀관계를 가질수는 있으나 추천하지는 않는다.
+즉, 다대다 관계를 지니는 테이블 자신과 재귀관계를 가질수는 있으나 추천하지는 않는다.
 
 **ManyToManyField를 넣어줄 필드명은 복수형(ex_ toppings)으로 짓는 것이 좋다.**
 
@@ -358,7 +358,7 @@ class Membership(models.Model):
 
 쿼리셋에서 실행해보기
 
-```
+```python
 >>> from blog.models import *
 >>> ringo = Musicians.objects.create(name="Ringo Starr") # Musicians 인스턴스 생성
 >>> paul = Musicians.objects.create(name="Paul McCartney") # Musicians 인스턴스 생성
@@ -382,7 +382,7 @@ class Membership(models.Model):
 
 **중간모델이 있는 경우 add(), create(), set()로 관계생성 불가**
 
-```
+```python
 # 에러 발생
 >>> beatles.members.add(john)
 >>> beatles.members.create(name="George Harrison")
@@ -396,7 +396,7 @@ class Membership(models.Model):
 `remove()` 메소드도 같은 이유에서 사용할 수 없다. 중간모델인 `Membership`의 인스턴스를 지우기 전까지는 `Musicians`나 `Group`의 인스턴스를 지워도 관계정보가 남아있으므로 지워지지 않는다. 
 
 
-```
+```python
 >>> Membership.objects.create(person=ringo, group=beatles, date_joined=date(1968, 9, 4), invite_reason="You've gone for a money and we miss you")
 <Membership: Membership object>
 >>> beatles.members.all()
@@ -408,7 +408,7 @@ AttributeError: Cannot use remove() on a ManyToManyField which specifies an inte
  
 대신 `clear()`는 다대다 관계의 모든! 인스턴스들을 지우는데 사용된다. 
 
-```
+```python
 >>> beatles.members.clear()
 >>> Membership.objects.all()
 <QuerySet []>
@@ -416,14 +416,14 @@ AttributeError: Cannot use remove() on a ManyToManyField which specifies an inte
 
 관계를 생성하고 지울 때 제약이 있다. 하지만 필터를 하거나 값을 가져올 때는(쿼리) 일반 다대다관계와 동일하게 사용한다. 
 
-```
+```python
 # 필터 
 
 >>> Group.objects.filter(members__name__startswith='Paul')
 [<Group: The Beatles>]
 ``` 
 
-```
+```python
 # 중간모델의 필드를 사용가능 
 
 Person.objects.filter(
@@ -432,7 +432,7 @@ Person.objects.filter(
 [<Person: Ringo Starr>]
 ```
 
-```
+```python
 # Membership 모델에서 직접 쿼리 가능
 
 >>> ringos_membership = Membership.objects.get(group=beatles, person=ringo)
@@ -442,7 +442,7 @@ datetime.date(1962, 8, 16)
 u'Needed a new drummer.'
 ```
 
-```
+```python
 # Person객체에서 membership 다대다역참조를 해도 쿼리 가능
 
 >>> ringos_membership = ringo.membership_set.get(group=beatles)
@@ -460,7 +460,7 @@ u'Needed a new drummer.'
 
 다른 필드타입과 같이 모델 내의 클래스 속성으로 정의한다. 
 
-하나의 모델을 다른 모델로 `확장`할 때 유용하게 쓰딘다. 
+하나의 모델을 다른 모델로 `확장`할 때 유용하게 쓰인다. 
 예를 들어, '가게정보'가 담긴 모델을 정의하고 그 안에 가게에 대한 기본정보 필드를 구현했다. 그런데 맛집정보를 가게정보에 추가하려고 한다면 새로 모델을 만들어 기존의 기본정보 필드를 다시 추가하는 것보다 OneToOneField를 선언하여 기존 모델을 새 모델의 내용으로 확장하게 할 수 있다.
 
 ForeignKey 필드와 마찬가지로 자기자신, 아직 선언되지 않은 모델에 대해서 관계를 가질 수 있다.
@@ -508,7 +508,7 @@ class Waiter(models.Model):
 
 쿼리셋 실행
 
-```
+```python
 >>> p1 = Place(name='Demon Dogs', address='shinsa')
 >>> p1.save()
 >>> p2 = Place(name='Ace Computer', address='gangnam')
@@ -591,7 +591,7 @@ class Hand(object):
 
 쿼리문 실행
 
-```
+```python
 >>> example = MyModel.objects.get(pk=1)
 >>> print(example.hand.north)
 >>> new_hand = Hand(north, east, south, west)
@@ -741,7 +741,7 @@ class Person(models.Model):
 
 쿼리문 실행
 
-```
+```python
 >>> for p in Person.objects.raw('SELECT * FROM myapp_person'):
 ...     print(p)
 John Smith
@@ -897,14 +897,14 @@ class Restaurant(Place):
 
 Place 모델에 선언된 모든 필드는 Restaurant 모델에서 사용할 수 있고, 각각의 테이블에 저장된다. 
 
-```
+```python
 >>> Place.objects.filter(name="Bob's Cafe")
 >>> Restaurant.objects.filter(name="Bob's Cafe")
 ```
 
 Place모델과 Restaurant 모델을 모두 만족하는 객체가 있다면 Restaurant모델명을 소문자화한 이름으로 Place모델 객체에서 Restaurant모델에 데이터에 접근할 수 있다. 
 
-```
+```python
 >>> p = Place.objects.get(id=12)
 # p가 Restaurant 모델의 객체이면 자식클래스에게 전달된다.
 >>> p.restaurant
@@ -913,7 +913,7 @@ Place모델과 Restaurant 모델을 모두 만족하는 객체가 있다면 Rest
 
 반면에 p가 Restaurant의 속성을 가지고 있지 않으면((Place 모델을 통해 직접 생성되었다거나, Restaurant 모델이 아닌 다른 자식클래스를 통해 만들어진 경우) DoesNotExist 에러가 난다.
 
-```
+```python
 >>> a = Place.objects.create(name="Bob's Forge", address="LA")
 >>> a.restaurant
 # Restaurant.DoesNowExist 예외 발생
@@ -921,7 +921,7 @@ Place모델과 Restaurant 모델을 모두 만족하는 객체가 있다면 Rest
 
 Place 모델과 자동으로 연결되는 Restaurant 모델의 OneToOneField는 다음과 같다.
 
-```
+```python
 place_ptr = models.OneToOneField(
 	Place, on_delete = models.CASCADE,
 	parent_link = True,
@@ -1001,7 +1001,7 @@ class MyPerson(Person):
 
 MyPerson모델은 Person모델의 데이터베이스 테이블을 사용한다. 또, Person의 인스턴스는 MyPerson모델을 통해서도 접근 가능하다.
 
-```
+```python
 >>> p = Person.objects.create(first_name="foobar")
 >>> MyPerson.objects.get(first_name="foobar")
 <MyPerson: foobar>
@@ -1009,7 +1009,7 @@ MyPerson모델은 Person모델의 데이터베이스 테이블을 사용한다. 
 
 기본 정렬순서를 바꿔주고 싶을 경우 프록시모델을 사용한다. 
 
-```
+```python
 class OrderedPerson(Person):
 	class Meta:
 		ordering = ['last_name']
